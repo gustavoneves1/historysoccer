@@ -4,19 +4,13 @@ import json
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine, Column, String, Integer
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from config import APIFOOTBALL
 
-# Data atual e dia anterior
-# data_atual = datetime.now()
-# dia_anterior = data_atual - timedelta(days=1)
-# data_formatada = dia_anterior.strftime("%Y-%m-%d")
+data_formatada = '2023-12-31'
 
-
-data_formatada = '2024-06-04'
-# URL de conexão SQLite
 DATABASE_URL = "sqlite:///football.db"
 
-# Configurar o SQLAlchemy
 engine = create_engine(DATABASE_URL, echo=True)
 Base = declarative_base()
 
@@ -35,7 +29,6 @@ class FootballTable(Base):
     home_goals = Column(Integer)
     away_goals = Column(Integer)
 
-# Criar a tabela no banco de dados
 Base.metadata.create_all(engine)
 
 def futebol_jogos():
@@ -88,14 +81,25 @@ def futebol_jogos():
 def salve_database():
     df = futebol_jogos()
     if not df.empty:
-        # Salvar os dados no banco de dados
-        df.to_sql('games', con=engine, if_exists='append', index=False)
-        print("Dados salvos no banco de dados SQLite.")
+        # Obter ids existentes no banco de dados
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        existing_ids = session.query(FootballTable.id_fixtures).all()
+        existing_ids = {id_fixtures for (id_fixtures,) in existing_ids}
+        
+        # Filtrar apenas os novos registros
+        new_records = df[~df['id_fixtures'].isin(existing_ids)]
+        
+        if not new_records.empty:
+            # Salvar os novos dados no banco de dados
+            new_records.to_sql('games', con=engine, if_exists='append', index=False)
+            print("Dados salvos no banco de dados SQLite.")
+        else:
+            print("Nenhum dado novo para salvar no banco de dados.")
+        
+        session.close()
     else:
         print("Nenhum dado para salvar no banco de dados.")
 
-
 salve_database()
-
-
 engine.dispose()
