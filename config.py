@@ -1,0 +1,3 @@
+APIFOOTBALL = '0d8b0148c7mshe0842af3af6ac49p1eca74jsn2de6863edddc'
+
+SENHABANCO = 'gnp040794'
