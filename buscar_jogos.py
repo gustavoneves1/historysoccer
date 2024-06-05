@@ -12,7 +12,7 @@ from config import APIFOOTBALL
 # data_formatada = dia_anterior.strftime("%Y-%m-%d")
 
 
-data_formatada = '2024-01-01'
+data_formatada = '2024-06-04'
 # URL de conexão SQLite
 DATABASE_URL = "sqlite:///football.db"
 
